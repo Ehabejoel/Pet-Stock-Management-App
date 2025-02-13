@@ -131,4 +131,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return pets;
     }
+
+    public int getTotalPetsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PETS, null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int getAvailablePetsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM " + TABLE_PETS + 
+            " WHERE " + COLUMN_AVAILABLE + " = 1", null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public double getTotalRevenue() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+            "SELECT SUM(" + COLUMN_PRICE + ") FROM " + TABLE_PETS + 
+            " WHERE " + COLUMN_AVAILABLE + " = 0", null);
+        double revenue = 0.0;
+        if (cursor.moveToFirst() && !cursor.isNull(0)) {
+            revenue = cursor.getDouble(0);
+        }
+        cursor.close();
+        return revenue;
+    }
+
+    public double getCurrentMonthRevenue() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        // Assuming we want to track monthly sales, we'd need a sale_date column
+        // For now, returning total revenue
+        return getTotalRevenue();
+    }
+
+    public int getSoldPetsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM " + TABLE_PETS + 
+            " WHERE " + COLUMN_AVAILABLE + " = 0", null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public void clearAllData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_PETS, null, null);
+    }
 }

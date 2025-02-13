@@ -19,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new HomeFragment();
             } else if (item.getItemId() == R.id.navigation_pets) {
                 selectedFragment = new PetsFragment();
-            } else if (item.getItemId() == R.id.navigation_inventory) {
-                selectedFragment = new InventoryFragment();
             } else if (item.getItemId() == R.id.navigation_settings) {
                 selectedFragment = new SettingsFragment();
             }

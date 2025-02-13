@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +13,7 @@ import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import com.example.petmanagement.utils.CurrencyFormatter;
 
 public class HomeFragment extends Fragment {
     private TextView totalPetsCount;
@@ -24,10 +26,12 @@ public class HomeFragment extends Fragment {
     private TextView monthlyRevenue;
     private TextView revenueTrend;
     private TextView lowStockCount;
+    private DatabaseHelper dbHelper;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        dbHelper = new DatabaseHelper(requireContext());
         initializeViews(view);
         setupDashboard();
         return view;
@@ -40,10 +44,7 @@ public class HomeFragment extends Fragment {
         recentActivityList = view.findViewById(R.id.recentActivityList);
 
         MaterialButton addPetButton = view.findViewById(R.id.addPetButton);
-        MaterialButton checkStockButton = view.findViewById(R.id.checkStockButton);
-
         addPetButton.setOnClickListener(v -> navigateToPets());
-        checkStockButton.setOnClickListener(v -> navigateToInventory());
 
         // Initialize new views
         stockCount = view.findViewById(R.id.stockCount);
@@ -66,16 +67,42 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateMetrics() {
-        // Update existing metrics
-        totalPetsCount.setText("24");
-        petsCountTrend.setText("↑ 8.5% vs last month");
-
-        // Update new metrics
-        stockCount.setText("156");
-        stockStatus.setText("Items in stock");
-        monthlyRevenue.setText("$5,280");
-        revenueTrend.setText("↑ 12.3% vs last month");
-        lowStockCount.setText("3");
+        try {
+            // Total Pets
+            int totalPets = dbHelper.getTotalPetsCount();
+            int availablePets = dbHelper.getAvailablePetsCount();
+            int soldPets = dbHelper.getSoldPetsCount();
+            double totalRevenue = dbHelper.getTotalRevenue();
+            
+            // Update UI
+            totalPetsCount.setText(String.valueOf(totalPets));
+            
+            // Calculate percentage change (example: based on sold vs available)
+            float percentChange = totalPets > 0 ? 
+                    (float) soldPets / totalPets * 100 : 0;
+            petsCountTrend.setText(String.format("%.1f%% sold", percentChange));
+            
+            // Stock count (available pets)
+            stockCount.setText(String.valueOf(availablePets));
+            stockStatus.setText("Pets available");
+            
+            // Revenue
+            monthlyRevenue.setText(CurrencyFormatter.formatFCFA(totalRevenue));
+            
+            // Revenue trend (example calculation)
+            double averagePrice = totalPets > 0 ? totalRevenue / soldPets : 0;
+            revenueTrend.setText("Avg. " + CurrencyFormatter.formatFCFA(averagePrice) + " per pet");
+            
+            // Low stock alert (if available pets are less than 5)
+            int lowStockAlert = availablePets < 5 ? availablePets : 0;
+            lowStockCount.setText(String.valueOf(lowStockAlert));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), 
+                "Error updating metrics: " + e.getMessage(), 
+                Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupRecentActivity() {
@@ -86,13 +113,6 @@ public class HomeFragment extends Fragment {
     private void navigateToPets() {
         getActivity().getSupportFragmentManager().beginTransaction()
             .replace(R.id.fragment_container, new PetsFragment())
-            .addToBackStack(null)
-            .commit();
-    }
-
-    private void navigateToInventory() {
-        getActivity().getSupportFragmentManager().beginTransaction()
-            .replace(R.id.fragment_container, new InventoryFragment())
             .addToBackStack(null)
             .commit();
     }

@@ -8,10 +8,9 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.chip.Chip;
 import java.util.List;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.ArrayList;
 import android.net.Uri;
+import com.example.petmanagement.utils.CurrencyFormatter;
 
 public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
     private List<Pet> pets;
@@ -83,8 +82,7 @@ public class PetAdapter extends RecyclerView.Adapter<PetAdapter.PetViewHolder> {
         public void bind(Pet pet) {
             petName.setText(pet.getName());
             petBreed.setText(pet.getBreed());
-            petPrice.setText(NumberFormat.getCurrencyInstance(Locale.US)
-                .format(pet.getPrice()));
+            petPrice.setText(CurrencyFormatter.formatFCFA(pet.getPrice()));
             
             statusChip.setText(pet.isAvailable() ? "Available" : "Sold");
             statusChip.setChipBackgroundColorResource(
