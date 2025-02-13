@@ -64,4 +64,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-Project Link: [https://github.com/yourusername/PetManagement](https://github.com/yourusername/PetManagement)
+email: ehabe.metuge@gmail.com
